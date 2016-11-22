@@ -5,8 +5,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Calculator {
+	
+	private Stack operationStack;
+	public Calculator(){
+		operationStack= new Stack();
+	}
+	
+	private float popStack(){
+		return Float.valueOf(operationStack.pop().toString());
+	}
+	private void pushStack(Object data){
+		operationStack.push(data);
+	}
+	private float publishResult() throws Exception{
+		if(operationStack.size()==1)
+			return popStack();
+		else
+			throw new Exception("Please insert a valid input");
+	}
 
-	private static boolean detectOperation(String data){
+	private static boolean isOperator(String data){
 		Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(data);
 		boolean result = m.find();
@@ -16,70 +34,58 @@ public class Calculator {
 	
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		String data="30,40,+";//args[0];
+		
 	}
 	
 	
 
 	public float calculate(String expression) throws Exception{
 		// TODO Auto-generated method stub
-		
-		String trimmedString=expression.trim();
-		if(trimmedString.length()<3){
-			throw new Exception("Please insert the data in form of operand,operand,operator");
-		}
 		String[] argsArr=expression.split(",");
-		if(detectOperation(argsArr[argsArr.length-1]) && detectOperation(argsArr[argsArr.length-2])){
-			throw new Exception("Please insert a valid input");
-		}
-		
-		Float result;	
-		
-		Stack operationStack = new Stack();
 		for(int i=0;i<argsArr.length;i++){
-			float temp;
-			if(!detectOperation(argsArr[i])){
-				operationStack.push(argsArr[i]);
-				
-			}else if(argsArr[i].equals("!")){
-				temp=calculateFactorial(operationStack.pop().toString());
-				
-				
-			}
-			else{
-				float stOperand=Float.valueOf(operationStack.pop().toString());
-				float ndoperand=Float.valueOf(operationStack.pop().toString());
-				if(argsArr[i].toString().equals("+")){
-					temp=stOperand+ndoperand;
-					operationStack.push(temp);
-				}else if(argsArr[i].toString().equals("-")){
-					temp=ndoperand-stOperand;
-					operationStack.push(temp);
-				}else if(argsArr[i].toString().equals("/")){
-					temp=ndoperand/stOperand;
-					operationStack.push(temp);
-				}else if(argsArr[i].toString().equals("*")){
-					temp=ndoperand*stOperand;
-					operationStack.push(temp);
-				}else if(argsArr[i].toString().equals("%")){
-					temp=ndoperand%stOperand;
-					operationStack.push(temp);
-				}
-				
-				
-			}
+			
+			if(!isOperator(argsArr[i]))
+				pushStack(argsArr[i]);
+			else
+				performBinaryOperation(argsArr[i]);
 		}
 		
-		if(operationStack.size()!=1)
-			throw new Exception("Please insert a valid input");
-		
-		result=(Float)operationStack.pop();
-		return result;
+		return publishResult();
 		
 	}
+	
+	
+	private void performBinaryOperation(Object operator) throws Exception{
 
-
+		if(operationStack.size()<2)
+			throw new Exception("Please insert a valid input");
+		
+		float operationResult=0;
+		float firstOperand=popStack();
+		float secondOperand=popStack();
+		
+		if(operator.toString().equals("+")){
+			operationResult=firstOperand+secondOperand;
+			
+		}else if(operator.toString().equals("-")){
+			operationResult=secondOperand-firstOperand;
+			
+		}else if(operator.toString().equals("/")){
+			operationResult=secondOperand/firstOperand;
+			
+		}else if(operator.toString().equals("*")){
+			operationResult=secondOperand*firstOperand;
+			
+		}else if(operator.toString().equals("%")){
+			operationResult=secondOperand%firstOperand;
+			
+		}
+		pushStack(operationResult);
+		
+	
+	}
+	
+	
 	private float calculateFactorial(String fac) throws Exception{
 		// TODO Auto-generated method stub
 		int fact = 0;
